@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ══ RESET & VARS ══════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sand: #C4A882;
+      --sand-light: #D9C4A8;
+      --sand-dark: #A8906A;
+      --cream: #F5EDE0;
+      --cream-light: #FAF5EE;
+      --brown-dark: #2C1F14;
+      --brown-mid: #5C3D2E;
+      --brown-text: #3A2415;
+      --white: #FEFCF8;
+      --shadow: 0 8px 32px rgba(44, 31, 20, 0.18);
+      --shadow-sm: 0 2px 12px rgba(44, 31, 20, 0.12);
+      --radius: 18px;
+      --radius-sm: 10px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--cream);
+      color: var(--brown-text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ══ SPLASH SCREEN ═══════════════════════════════════════════ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--brown-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #splash.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: splashIn 0.8s ease forwards;
+}
+
+/* 🌟 NOVO: Esse faz o círculo perfeito de fundo onde a logo fica centralizada */
+.splash-logo-circle {
+  width: 210px;
+  height: 210px;
+  background: var(--sand);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 60px rgba(114, 98, 76, 0.4);
+}
+
+/* 🌟 ATUALIZADO: Regula o tamanho e comportamento da imagem da logo */
+.logo {
+  width: 500px;        /* Ajuste esse valor se quiser a logo maior ou menor dentro do círculo */
+  height: auto;
+  object-fit: contain;
+}
+
+.splash-icon svg {
+  width: 64px;
+  height: 64px;
+  fill: var(--brown-dark);
+}
+
+.splash-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--sand-light);
+  letter-spacing: 4px;
+}
+
+.splash-sub {
+  font-size: 0.85rem;
+  letter-spacing: 6px;
+  color: var(--sand-dark);
+  text-transform: uppercase;
+}
+
+.splash-loader {
+  margin-top: 40px;
+  width: 160px;
+  height: 2px;
+  background: rgba(196, 168, 130, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.splash-loader-bar {
+  height: 100%;
+  width: 0;
+  background: var(--sand);
+  animation: loadBar 1.4s ease forwards 0.3s;
+}
+
+    @keyframes loadBar {
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes splashIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ══ APP CONTAINER ════════════════════════════════════════════ */
+    #app {
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ══ AUTH PAGES (Login / Cadastro / Reset) ══════════════════ */
+    .auth-page {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      flex-direction: row;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .auth-page.active {
+      display: flex;
+    }
+
+    .auth-bg {
+      flex: 0 0 44%;
+      background-image: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=900&q=80');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .auth-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(44, 31, 20, 0.3), transparent);
+    }
+
+    .auth-bg-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      padding: 40px;
+    }
+
+    .auth-bg-text {
+      font-family: 'Playfair Display', serif;
+      color: var(--cream-light);
+      font-size: 2.2rem;
+      line-height: 1.2;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-panel {
+      flex: 1;
+      background: var(--sand);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 50px;
+      position: relative;
+    }
+
+    .auth-logo-top {
+      position: absolute;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--brown-dark);
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+
+    .auth-logo-top svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--brown-dark);
+    }
+
+    .auth-form-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .auth-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      margin-bottom: 36px;
+    }
+
+    .auth-admin-link {
+      position: absolute;
+      top: 32px;
+      right: 36px;
+      font-size: 0.78rem;
+      color: var(--brown-mid);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-decoration: underline;
+      transition: var(--transition);
+    }
+
+    .auth-admin-link:hover {
+      color: var(--brown-dark);
+    }
+
+    .field-group {
+      margin-bottom: 22px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--brown-dark);
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--cream-light);
+      border: 2px solid transparent;
+      border-radius: 50px;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.95rem;
+      color: var(--brown-text);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .field-input:focus {
+      border-color: var(--brown-mid);
+      box-shadow: 0 0 0 4px rgba(92, 61, 46, 0.1);
+    }
+
+    .auth-link {
+      display: block;
+      text-align: right;
+      margin-bottom: 22px;
+      font-size: 0.85rem;
+      color: var(--brown-mid);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .auth-link:hover {
+      color: var(--brown-dark);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 17px;
+      background: var(--cream-light);
+      color: var(--brown-dark);
+      border: none;
+      border-radius: 50px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--white);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .auth-divider {
+      text-align: center;
+      margin: 20px 0;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--brown-mid);
+      font-size: 0.9rem;
+    }
+
+    .auth-alt {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--brown-dark);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .auth-alt:hover {
+      color: var(--brown-mid);
+      text-decoration: underline;
+    }
+
+    /* Error message */
+    .auth-error {
+      background: rgba(180, 50, 50, 0.12);
+      border: 1px solid rgba(180, 50, 50, 0.3);
+      color: #8b1a1a;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .auth-error.show {
+      display: block;
+    }
+
+    .auth-success {
+      background: rgba(50, 120, 50, 0.12);
+      border: 1px solid rgba(50, 120, 50, 0.3);
+      color: #1a5c1a;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .auth-success.show {
+      display: block;
+    }
+
+    /* ══ RESET SENHA ══════════════════════════════════════════════ */
+    .reset-step {
+      display: none;
+    }
+
+    .reset-step.active {
+      display: block;
+    }
+
+    .reset-code-input {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 16px 0;
+    }
+
+    .reset-code-input input {
+      width: 50px;
+      height: 58px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--cream-light);
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: var(--transition);
+      color: var(--brown-dark);
+    }
+
+    .reset-code-input input:focus {
+      border-color: var(--brown-mid);
+    }
+
+    /* ══ ANIMATIONS ══════════════════════════════════════════════ */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ══ RESPONSIVE ══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .auth-bg {
+        display: none;
+      }
+
+      .auth-panel {
+        padding: 50px 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ SPLASH ══════════════════════════════════════════════ -->
+  <div id="splash">
+  <div class="splash-logo">
+    <div class="splash-logo-circle">
+      <img src="logo.png" class="logo">
+    </div>
+    <div class="splash-title">Lumina</div>
+    <div class="splash-loader">
+      <div class="splash-loader-bar"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- ══ APP ════════════════════════════════════════════════ -->
+  <div id="app">
+
+    <!-- LOGIN -->
+    <div class="auth-page active" id="page-login">
+      <div class="auth-bg">
+        <div class="auth-bg-overlay">
+          <div class="auth-bg-text">Milhares de histórias<br>esperando por você.</div>
+        </div>
+      </div>
+      <div class="auth-panel">
+        <img src="logo.png" alt="Logo" style="width: 320px; margin-bottom: 8px; margin-top: -100px;">
+
+
+        <span class="auth-admin-link" onclick="showPage('page-login-admin')">Entrar como administrador</span>
+        <div class="auth-form-wrap">
+          <div class="auth-title">Bem-vindo de volta</div>
+          <div class="auth-error" id="login-error"></div>
+          <div class="field-group">
+            <label class="field-label">Usuário</label>
+            <input type="text" class="field-input" id="login-usuario" placeholder="seu_usuario" autocomplete="username">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Senha</label>
+            <input type="password" class="field-input" id="login-senha" placeholder="••••••••"
+              autocomplete="current-password">
+          </div>
+          <span class="auth-link" onclick="showPage('page-reset')">Esqueceu a senha?</span>
+          <button class="btn-primary" onclick="doLogin()">Entrar</button>
+          <div class="auth-divider">— ou —</div>
+          <div class="auth-alt" onclick="showPage('page-cadastro')">Cadastre-se</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN ADMIN -->
+    <div class="auth-page" id="page-login-admin">
+      <div class="auth-bg">
+        <div class="auth-bg-overlay">
+          <div class="auth-bg-text">Painel de<br>Administração.</div>
+        </div>
+      </div>
+      <div class="auth-panel">
+        <img src="logo.png" alt="Logo" style="width: 320px; margin-bottom: 8px; margin-top: -100px;">
+
+        <span class="auth-admin-link" onclick="showPage('page-login')" style="text-decoration:none;">← Voltar</span>
+        <div class="auth-form-wrap">
+          <div class="auth-title">Administrador</div>
+          <div class="auth-error" id="admin-error"></div>
+          <div class="field-group">
+            <label class="field-label">Nome</label>
+            <input type="text" class="field-input" id="admin-usuario" placeholder="admin" autocomplete="username">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Senha</label>
+            <input type="password" class="field-input" id="admin-senha" placeholder="••••••••"
+              autocomplete="current-password">
+          </div>
+          <button class="btn-primary" onclick="doLoginAdmin()">Entrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="auth-page" id="page-cadastro">
+      <div class="auth-bg">
+        <div class="auth-bg-overlay">
+          <div class="auth-bg-text">Comece sua<br>jornada literária.</div>
+        </div>
+      </div>
+      <div class="auth-panel">
+      <img src="logo.png" alt="Logo" style="width: 320px; margin-bottom: 8px; margin-top: -70px;">
+        <div class="auth-form-wrap">
+          <div class="auth-title">Cadastrar-se</div>
+          <div class="auth-error" id="cadastro-error"></div>
+          <div class="field-group">
+            <label class="field-label">Usuário</label>
+            <input type="text" class="field-input" id="cad-usuario" placeholder="seu_usuario">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Senha</label>
+            <input type="password" class="field-input" id="cad-senha" placeholder="••••••••">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirmar senha</label>
+            <input type="password" class="field-input" id="cad-confirma" placeholder="••••••••">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Email</label>
+            <input type="email" class="field-input" id="cad-email" placeholder="email@exemplo.com">
+          </div>
+          <button class="btn-primary" onclick="doCadastro()">Cadastrar</button>
+          <div class="auth-divider">— ou —</div>
+          <div class="auth-alt" onclick="showPage('page-login')">Já tenho conta</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECUPERAR SENHA -->
+    <div class="auth-page" id="page-reset">
+      <div class="auth-bg">
+        <div class="auth-bg-overlay">
+          <div class="auth-bg-text">Recuperar<br>acesso.</div>
+        </div>
+      </div>
+      <div class="auth-panel">
+       <div id="splash-screen">
+
+    <img src="logo.png" alt="Logo" style="max-height: 80px; margin-bottom: 16px;">
+
+  </div>
+        <span class="auth-admin-link" onclick="showPage('page-login')" style="text-decoration:none;">← Voltar</span>
+        <div class="auth-form-wrap">
+          <div class="auth-title">Recuperar senha</div>
+          <div class="auth-error" id="reset-error"></div>
+          <div class="auth-success" id="reset-success"></div>
+
+          <!-- Step 1: Email -->
+          <div class="reset-step active" id="reset-step1">
+            <p style="margin-bottom:20px;color:var(--brown-mid);line-height:1.6;">
+              Informe o email cadastrado. Você receberá um código de verificação.
+            </p>
+            <div class="field-group">
+              <label class="field-label">Email</label>
+              <input type="email" class="field-input" id="reset-email" placeholder="email@exemplo.com">
+            </div>
+            <button class="btn-primary" onclick="doEnviarCodigo()">Enviar código</button>
+          </div>
+
+          <!-- Step 2: Código -->
+          <div class="reset-step" id="reset-step2">
+            <p style="margin-bottom:20px;color:var(--brown-mid);line-height:1.6;">
+              Digite o código de 6 dígitos enviado para seu email.
+            </p>
+            <div class="reset-code-input">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,0)">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,1)">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,2)">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,3)">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,4)">
+              <input type="text" maxlength="1" class="code-digit" oninput="moveCode(this,5)">
+            </div>
+            <button class="btn-primary" onclick="doVerificarCodigo()">Verificar código</button>
+          </div>
+
+          <!-- Step 3: Nova senha -->
+          <div class="reset-step" id="reset-step3">
+            <div class="field-group">
+              <label class="field-label">Nova senha</label>
+              <input type="password" class="field-input" id="reset-nova" placeholder="Nova senha">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Confirmar senha</label>
+              <input type="password" class="field-input" id="reset-confirma" placeholder="Confirme a nova senha">
+            </div>
+            <button class="btn-primary" onclick="doResetarSenha()">Redefinir senha</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #app -->
+
+  <script>
+    // ══════════════════════════════════════════════
+    // CONFIGURAÇÃO DA API
+    // ══════════════════════════════════════════════
+    const API = 'http://localhost:3000/api';
+
+    // ══════════════════════════════════════════════
+    // SPLASH SCREEN
+    // ══════════════════════════════════════════════
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('splash').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }, 2200);
+    });
+
+    // ══════════════════════════════════════════════
+    // NAVEGAÇÃO ENTRE PÁGINAS AUTH
+    // ══════════════════════════════════════════════
+    function showPage(id) {
+      document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      // Limpar erros
+      document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.classList.remove('show'));
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.classList.add('show');
+    }
+    function showSuccess(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.classList.add('show');
+    }
+
+    // ══════════════════════════════════════════════
+    // SPLASH APÓS LOGIN/CADASTRO → redirecionar
+    // ══════════════════════════════════════════════
+    function splashAndRedirect(token, isAdmin, usuario, customRedirect) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('is_admin', isAdmin ? '1' : '0');
+      localStorage.setItem('usuario', usuario);
+
+      // Mostrar splash novamente
+      const splash = document.getElementById('splash');
+      splash.classList.remove('hidden');
+      splash.querySelector('.splash-loader-bar').style.animation = 'none';
+      splash.querySelector('.splash-loader-bar').style.width = '0';
+      setTimeout(() => {
+        splash.querySelector('.splash-loader-bar').style.animation = 'loadBar 1.2s ease forwards';
+      }, 50);
+
+      setTimeout(() => {
+        // Redireciona usando o link enviado dinamicamente pela API (homeus.html ou homead.html)
+        window.location.href = customRedirect || (isAdmin ? 'admin.html' : 'usuario.html');
+      }, 1600);
+    }
+
+    // ══════════════════════════════════════════════
+    // LOGIN USUÁRIO (Sua função encaixada e otimizada)
+    // ══════════════════════════════════════════════
+    async function fazerLogin(event) {
+      if (event) event.preventDefault();
+
+      // No seu HTML o campo de email/identificação possui o ID 'login-usuario'
+      const email = document.getElementById('login-usuario').value.trim();
+      const senha = document.getElementById('login-senha').value;
+
+      if (!email || !senha) return showError('login-error', 'Preencha todos os campos.');
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          if (data.role === 'user') {
+            // Guarda o nome na sessão para exibir na homeus
+            sessionStorage.setItem('username', data.username || email);
+          }
+
+          // Aciona sua animação nativa passando a rota de redirecionamento vinda do banco de dados (data.redirect)
+          const isAdmin = data.role === 'admin';
+          splashAndRedirect(data.token || '', isAdmin, data.username || email, data.redirect);
+        } else {
+          showError('login-error', data.error || "Erro ao fazer login");
+        }
+      } catch (err) {
+        showError('login-error', "Erro ao conectar ao servidor.");
+      }
+    }
+
+    // Mantém o mapeamento antigo como redirecionador de segurança caso algum botão chame por doLogin()
+    async function doLogin() {
+      await fazerLogin(null);
+    }
+
+    // LOGIN DO ADMINISTRADOR (Agora mapeia corretamente para 'email' na API)
+    async function doLoginAdmin(event) {
+      if (event) event.preventDefault();
+      const email = document.getElementById('admin-usuario').value.trim();
+      const senha = document.getElementById('admin-senha').value;
+
+      if (!email || !senha) return showError('admin-error', 'Preencha todos os campos.');
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha }) // Envia como email para bater com a API
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('admin-error', data.error || 'Erro ao entrar.');
+        if (data.role !== 'admin') return showError('admin-error', 'Este usuário não é administrador.');
+
+        splashAndRedirect(data.token || '', true, 'Admin', data.redirect);
+      } catch {
+        showError('admin-error', 'Não foi possível conectar ao servidor.');
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // CADASTRO
+    // ══════════════════════════════════════════════
+    async function doCadastro(event) {
+      if (event) event.preventDefault();
+      const usuario = document.getElementById('cad-usuario').value.trim();
+      const senha = document.getElementById('cad-senha').value;
+      const confirma = document.getElementById('cad-confirma').value;
+      const email = document.getElementById('cad-email').value.trim();
+
+      if (!usuario || !senha || !email) return showError('cadastro-error', 'Preencha todos os campos.');
+      if (senha !== confirma) return showError('cadastro-error', 'As senhas não coincidem.');
+      if (senha.length < 6) return showError('cadastro-error', 'A senha deve ter pelo menos 6 caracteres.');
+
+      try {
+        const res = await fetch(`${API}/cadastro`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: usuario, senha, email })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('cadastro-error', data.error || 'Erro ao cadastrar.');
+
+        alert('Cadastro realizado com sucesso!');
+        showPage('page-login'); // Altera a aba visível para o login automaticamente
+        document.getElementById('login-usuario').value = email; // Preenche o usuário cadastrado com o e-mail para facilitar
+      } catch {
+        showError('cadastro-error', 'Erro ao conectar com o banco de dados.');
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // RECUPERAR SENHA
+    // ══════════════════════════════════════════════
+    let resetEmail = '';
+
+    async function doEnviarCodigo() {
+      resetEmail = document.getElementById('reset-email').value.trim();
+      if (!resetEmail) return showError('reset-error', 'Informe seu email.');
+      try {
+        const res = await fetch(`${API}/esqueci-senha`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: resetEmail })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('reset-error', data.error || 'Email não encontrado.');
+        document.getElementById('reset-step1').classList.remove('active');
+        document.getElementById('reset-step2').classList.add('active');
+        showSuccess('reset-success', 'Código enviado para ' + resetEmail);
+      } catch { showError('reset-error', 'Erro ao enviar código.'); }
+    }
+
+    function moveCode(input, idx) {
+      input.value = input.value.replace(/\D/g, '');
+      const digits = document.querySelectorAll('.code-digit');
+      if (input.value && idx < 5) digits[idx + 1].focus();
+    }
+
+    async function doVerificarCodigo() {
+      const digits = document.querySelectorAll('.code-digit');
+      const codigo = [...digits].map(d => d.value).join('');
+      if (codigo.length < 6) return showError('reset-error', 'Digite o código completo.');
+      document.getElementById('reset-step2').classList.remove('active');
+      document.getElementById('reset-step3').classList.add('active');
+      document.getElementById('reset-error').classList.remove('show');
+      window._resetCodigo = codigo;
+    }
+
+    async function doResetarSenha() {
+      const nova = document.getElementById('reset-nova').value;
+      const confirma = document.getElementById('reset-confirma').value;
+      if (nova !== confirma) return showError('reset-error', 'As senhas não coincidem.');
+      if (nova.length < 6) return showError('reset-error', 'Senha deve ter pelo menos 6 caracteres.');
+      try {
+        const res = await fetch(`${API}/resetar-senha`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: resetEmail, codigo: window._resetCodigo, nova_senha: nova })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('reset-error', data.error || 'Erro ao resetar.');
+        showSuccess('reset-success', 'Senha redefinida com sucesso!');
+        setTimeout(() => showPage('page-login'), 2000);
+      } catch { showError('reset-error', 'Erro ao conectar.'); }
+    }
+
+    // Ouvintes das chaves do teclado (Enter Key)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('login-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(e); });
+      document.getElementById('admin-senha').addEventListener('keydown', e => { if (e.key === 'Enter') doLoginAdmin(e); });
+    });
+  </script>
+</body>
+
+</html>

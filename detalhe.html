@@ -1,0 +1,954 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Livro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: #C4A882;
+      min-height: 100vh;
+      color: #2C1F14;
+    }
+
+    /* ── LAYOUT: dois painéis ── */
+    .page {
+      display: flex;
+      min-height: 100vh;
+      gap: 0;
+    }
+
+    /* PAINEL ESQUERDO */
+    .left {
+      flex: 1;
+      padding: 36px 40px 40px;
+    }
+
+    /* topo: capa + info */
+    .top-row {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 22px;
+      align-items: flex-start;
+    }
+
+    .book-cover {
+      width: 148px;
+      height: 200px;
+      border-radius: 14px;
+      background: #F5EDE0;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+    }
+
+    .book-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cover-ph {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: .85rem;
+      color: #5C3D2E;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .book-meta {
+      flex: 1;
+    }
+
+    .book-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      color: #2C1F14;
+      margin-bottom: 4px;
+    }
+
+    .book-author {
+      font-size: .9rem;
+      color: #5C3D2E;
+      margin-bottom: 18px;
+    }
+
+    /* Reserva box */
+    .reserva-box {
+      display: inline-block;
+    }
+
+    .reserva-label {
+      font-size: .82rem;
+      color: #2C1F14;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    /* calendário */
+    .mini-cal {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .cal-d {
+      text-align: center;
+      min-width: 34px;
+      padding: 5px 3px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .18);
+    }
+
+    .cal-d .dn {
+      font-size: .55rem;
+      opacity: .75;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .cal-d .dd {
+      font-size: .95rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .cal-d.today {
+      background: #F5EDE0;
+      border-radius: 20px;
+      color: #2C1F14;
+    }
+
+    .btn-solicitar {
+      display: inline-block;
+      padding: 8px 20px;
+      background: #F5EDE0;
+      color: #2C1F14;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Lato', sans-serif;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .btn-solicitar:hover {
+      background: #fff;
+    }
+
+    /* estrelas abaixo da capa */
+    .stars-row {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 22px;
+    }
+
+    .star {
+      font-size: 18px;
+      color: rgba(255, 255, 255, .35);
+    }
+
+    .star.on {
+      color: #E8C547;
+    }
+
+    /* caixa branca do resumo */
+    .resumo-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px 24px;
+      min-height: 160px;
+      margin-bottom: 28px;
+    }
+
+    .resumo-box p {
+      font-size: .9rem;
+      line-height: 1.8;
+      color: #5C3D2E;
+    }
+
+    /* ── COMENTÁRIOS ── */
+    .comments-section h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: #2C1F14;
+      margin-bottom: 14px;
+    }
+
+    .r-form {
+      background: rgba(255, 255, 255, .25);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .r-form-stars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .r-form-stars .star {
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .r-form textarea {
+      width: 100%;
+      min-height: 62px;
+      resize: vertical;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .55);
+      font-family: 'Lato', sans-serif;
+      font-size: .86rem;
+      color: #2C1F14;
+      outline: none;
+    }
+
+    .btn-post {
+      margin-top: 15px;
+      float: right;
+      padding: 8px 20px;
+      background: #F5EDE0;
+      color: #2C1F14;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    /* Sub-feeds de Notas e Comentários */
+    .sub-feed-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin: 15px 0 5px 10px;
+      color: #2C1F14;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .rating-item {
+      background: rgba(255, 255, 255, 0.15);
+      margin: 6px 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    /* feed de comentários */
+    .feed {
+      border-left: 2px dashed rgba(255, 255, 255, .35);
+      padding-left: 0;
+      margin-left: 10px;
+      clear: both;
+      padding-top: 8px;
+    }
+
+    .c-item {
+      display: flex;
+      padding: 14px 0 14px 24px;
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .c-item::before {
+      content: '◆';
+      position: absolute;
+      left: -5px;
+      top: 18px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, .5);
+    }
+
+    .c-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      overflow: hidden;
+      margin-right: 14px;
+      background: #A8906A;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+    }
+
+    .c-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .c-avatar-ph {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .c-body {
+      flex: 1;
+    }
+
+    .c-name {
+      font-weight: 700;
+      font-size: .9rem;
+      color: #2C1F14;
+      margin-bottom: 5px;
+    }
+
+    .c-text {
+      font-size: .84rem;
+      color: #3A2415;
+      line-height: 1.65;
+      font-style: italic;
+      margin-bottom: 7px;
+    }
+
+    .c-foot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .c-tag {
+      font-size: .71rem;
+      color: #b0435c;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: bold;
+    }
+
+    .c-time {
+      font-size: .71rem;
+      color: rgba(44, 31, 20, .6);
+    }
+
+    /* PAINEL DIREITO — Livros semelhantes */
+    .right {
+      width: 300px;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, .08);
+      padding: 28px 18px;
+      border-left: 1px solid rgba(255, 255, 255, .15);
+    }
+
+    .right h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: #2C1F14;
+      margin-bottom: 18px;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sim-card {
+      cursor: pointer;
+      transition: transform .2s;
+    }
+
+    .sim-card:hover {
+      transform: scale(1.05);
+    }
+
+    .sim-cover {
+      aspect-ratio: 2/3;
+      border-radius: 9px;
+      background: #F5EDE0;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+
+    .sim-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .sim-ph {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .55rem;
+      color: #5C3D2E;
+      text-align: center;
+      padding: 4px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .sim-stars {
+      display: flex;
+      gap: 1px;
+      margin-bottom: 2px;
+    }
+
+    .sim-stars .star {
+      font-size: 9px;
+    }
+
+    .sim-name {
+      font-size: .65rem;
+      color: #2C1F14;
+      line-height: 1.2;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 20px 10px;
+      font-size: .82rem;
+      color: rgba(44, 31, 20, .6);
+      font-style: italic;
+    }
+
+    /* ================= RESPONSIVIDADE CORRIGIDA ================= */
+
+    @media (max-width: 1024px) {
+      .right {
+        width: 250px;
+      }
+      .sim-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* No mobile voltamos ao comportamento absoluto controlado para economizar espaço */
+      .header-navigation {
+        padding: 0;
+      }
+      
+      .btn-voltar-topo {
+        position: absolute;
+        top: 16px;
+        right: 24px;
+        z-index: 1000;
+      }
+
+      .page {
+        flex-direction: column;
+        padding-top: 40px; 
+      }
+
+      .left {
+        padding: 20px;
+      }
+
+      .right {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,.15);
+        padding: 20px;
+      }
+
+      .top-row {
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: left;
+        gap: 20px;
+      }
+
+      .book-meta {
+        width: auto;
+      }
+
+      .book-title {
+        font-size: 1.3rem;
+      }
+
+      .book-author {
+        font-size: 0.85rem;
+      }
+
+      .reserva-box {
+        width: 100%;
+      }
+
+      .mini-cal {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .btn-solicitar {
+        width: auto;
+        margin-top: 0;
+      }
+
+      .stars-row {
+        justify-content: flex-start;
+      }
+
+      .resumo-box {
+        padding: 18px;
+      }
+
+      .comments-section h4 {
+        text-align: left;
+      }
+
+      .sim-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .left {
+        padding: 15px;
+      }
+
+      .top-row {
+        flex-direction: row;
+        gap: 14px;
+      }
+
+      .book-cover {
+        width: 105px;
+        height: 145px;
+      }
+
+      .book-title {
+        font-size: 1.1rem;
+        line-height: 1.2;
+      }
+
+      .book-author {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+      }
+
+      .mini-cal {
+        gap: 2px;
+        margin-bottom: 8px;
+      }
+
+      .cal-d {
+        min-width: 25px;
+        padding: 4px 2px;
+      }
+
+      .cal-d .dd {
+        font-size: 0.75rem;
+      }
+
+      .cal-d .dn {
+        font-size: 0.45rem;
+      }
+
+      .btn-solicitar {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+      }
+
+      .resumo-box p {
+        font-size: 0.82rem;
+        line-height: 1.6;
+      }
+
+      .r-form {
+        padding: 12px;
+      }
+
+      .r-form textarea {
+        font-size: 0.8rem;
+      }
+
+      .btn-post {
+        width: 100%;
+        float: none;
+      }
+
+      .c-item {
+        flex-direction: column;
+        padding-left: 20px;
+      }
+
+      .c-avatar {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+
+      .c-foot {
+        gap: 5px;
+      }
+
+      .sim-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .sim-name {
+        font-size: 0.7rem;
+      }
+    }
+    
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+
+    <div class="left">
+
+      <div class="top-row">
+        <div class="book-cover" id="d-cover">
+          <div class="cover-ph" id="d-cover-ph">Capa</div>
+        </div>
+        <div class="book-meta">
+          <div class="book-title" id="d-title">Carregando livro...</div>
+          <div class="book-author" id="d-author">Autor</div>
+
+          <div class="reserva-box">
+            <div class="reserva-label" id="d-rlabel">Status:</div>
+            <div class="mini-cal" id="d-cal"></div>
+            <button class="btn-solicitar" id="d-btn-sol" onclick="solicitarReserva()">Solicitar reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stars-row" id="d-stars"></div>
+
+      <div class="resumo-box">
+        <p id="d-resumo">Resumo do livro aparece aqui.</p>
+      </div>
+
+      <div class="comments-section">
+        <h4>Avaliações e comentários</h4>
+
+        <div class="r-form">
+          <div class="r-form-stars" id="rf-stars">
+            <span class="star" onclick="setR(1)">★</span>
+            <span class="star" onclick="setR(2)">★</span>
+            <span class="star" onclick="setR(3)">★</span>
+            <span class="star" onclick="setR(4)">★</span>
+            <span class="star" onclick="setR(5)">★</span>
+          </div>
+
+          <textarea id="rf-txt" placeholder="Escreva seu comentário…"></textarea>
+
+          <button class="btn-post" onclick="postReview()">
+            Publicar
+          </button>
+          <div style="clear:both;"></div>
+        </div>
+
+        <div class="sub-feed-title">Notas dos Usuários</div>
+        <div id="ratings-feed"></div>
+
+        <div class="sub-feed-title">Comentários</div>
+        <div class="feed" id="comments-feed"></div>
+      </div>
+
+    </div><aside class="right">
+      <h4>Livros semelhantes</h4>
+      <div class="sim-grid" id="d-sim"></div>
+    </aside>
+
+  </div>
+
+  <script>
+  // Ajustado para apontar corretamente para o seu servidor Node Express
+const API = 'http://localhost:3000/api'; 
+
+const params = new URLSearchParams(location.search);
+const bookId = parseInt(params.get('id')) || 0;
+let curBook = null;
+let allBooks = [];
+let selRating = 0;
+
+const starsHTML = (n, sz) =>
+  Array.from({ length: 5 }, (_, i) =>
+    `<span class="star ${i < Math.round(n) ? 'on' : ''}" style="font-size:${sz}px">★</span>`
+  ).join('');
+
+// CORRIGIDO: Retorna o caminho da imagem direto da raiz do servidor public/ se ela existir
+const coverEl = (url, titulo) =>
+  url ? `<img src="/${url}" alt="${titulo}" style="max-width:100%; height:auto; border-radius:8px;">`
+      : `<div class="cover-ph">${titulo}</div>`;
+
+const ago = d => {
+  if (!d) return 'agora';
+  const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 60) return 'agora';
+  if (s < 3600) return ~~(s / 60) + ' min atrás';
+  if (s < 86400) return ~~(s / 3600) + 'h atrás';
+  return ~~(s / 86400) + 'd atrás';
+};
+
+window.addEventListener('load', async () => {
+  try {
+    allBooks = await fetch(`${API}/livros`).then(r => r.json());
+  } catch { 
+    allBooks = [];
+  }
+  if (bookId) {
+    loadBook(bookId);
+  } else {
+    document.getElementById('d-title').textContent = 'Nenhum livro selecionado.';
+  }
+});
+
+async function loadBook(id) {
+  try {
+    // 1. Busca os dados do livro na API
+    const response = await fetch(`${API}/livros/${id}`);
+    if (!response.ok) throw new Error("Livro não encontrado na API");
+    
+    curBook = await response.json();
+    
+    // 2. Renderiza a parte principal
+    renderBook(curBook);
+    
+    // 3. Tenta carregar os itens secundários de forma isolada
+    try { 
+      await loadReviews(id); 
+    } catch (e) { 
+      console.error("Erro ao carregar avaliações:", e); 
+    }
+    
+    try { 
+      renderSimilar(curBook); 
+    } catch (e) { 
+      console.error("Erro ao carregar livros semelhantes:", e); 
+    }
+
+  } catch (err) { 
+    console.error("Erro crítico no loadBook:", err);
+    document.getElementById('d-title').textContent = 'Erro ao carregar os dados do banco.'; 
+  }
+}
+
+function renderBook(b) {
+  document.getElementById('d-cover').innerHTML = coverEl(b.capa_url, b.titulo);
+  document.getElementById('d-title').textContent = b.titulo;
+  document.getElementById('d-author').textContent = b.autor || 'Autor Desconhecido';
+  document.getElementById('d-resumo').textContent = b.resumo || 'Sem resumo disponível.';
+  document.getElementById('d-stars').innerHTML = starsHTML(b.media_avaliacao || 0, 18);
+
+  const lbl = document.getElementById('d-rlabel');
+  const cal = document.getElementById('d-cal');
+  const btn = document.getElementById('d-btn-sol');
+
+  // Ajuste fino dos textos baseados no status vindo do banco
+  if (b.reserva_status === 'aprovada') {
+    lbl.textContent = 'Reservado';
+    btn.textContent = 'Indisponível (Em uso)';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+  } else if (b.reserva_status === 'pendente') {
+    lbl.textContent = 'Aguardando aprovação';
+    btn.textContent = 'Solicitação Pendente...';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+  } else {
+    lbl.textContent = 'Disponível';
+    btn.textContent = 'Solicitar reserva';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+
+  // Montagem do mini-calendário semanal
+  const today = new Date();
+  const DN = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const days = [-2, -1, 0, 1, 2, 3, 4].map(n => { 
+    const d = new Date(today); 
+    d.setDate(today.getDate() + n); 
+    return d; 
+  });
+
+  cal.innerHTML = days.map(d => {
+    const isT = d.toDateString() === today.toDateString();
+    return `<div class="cal-d ${isT ? 'today' : ''}">
+      <span class="dn">${DN[d.getDay()]}</span>
+      <span class="dd">${d.getDate()}</span>
+    </div>`;
+  }).join('');
+}
+
+async function solicitarReserva() {
+  if (!curBook) return;
+  
+  const devol = new Date(); 
+  devol.setDate(devol.getDate() + 14);
+  const btn = document.getElementById('d-btn-sol');
+
+  try {
+    const res = await fetch(`${API}/reservas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        livro_id: curBook.id, 
+        data_devolucao: devol.toISOString().split('T')[0] 
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) { 
+      alert(data.error || 'Erro ao solicitar'); 
+      return; 
+    }
+    
+    alert("Sua solicitação foi enviada para o administrador!");
+    btn.textContent = 'Solicitação Pendente...';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    document.getElementById('d-rlabel').textContent = 'Aguardando aprovação';
+    
+  } catch (error) {
+    console.error("Erro na requisição:", error);
+  }
+}
+
+async function loadReviews(id) {
+  const ratingsFeed = document.getElementById('ratings-feed');
+  const commentsFeed = document.getElementById('comments-feed');
+
+  try {
+    const response = await fetch(`${API}/livros/${id}/avaliacoes`);
+    if (!response.ok) throw new Error();
+    const list = await response.json();
+
+    ratingsFeed.innerHTML = '';
+    commentsFeed.innerHTML = '';
+
+    if (!list || !list.length) {
+      ratingsFeed.innerHTML = '<div class="empty">Nenhuma avaliação técnica.</div>';
+      commentsFeed.innerHTML = '<div class="empty">Nenhum comentário escrito ainda.</div>';
+      return;
+    }
+
+    list.forEach(r => {
+      if (r.nota) {
+        ratingsFeed.innerHTML += `
+          <div class="rating-item">
+            <strong>${r.usuario || 'Anônimo'}</strong>
+            <span class="c-tag">Nota: ${r.nota}/5</span>
+            <span class="c-time">${ago(r.criado_em)}</span>
+          </div>
+        `;
+      }
+
+      if (r.comentario) {
+        commentsFeed.innerHTML += `
+          <div class="c-item">
+            <div class="c-avatar">
+              ${r.foto_perfil
+                ? `<img src="/${r.foto_perfil}">`
+                : `<div class="c-avatar-ph">${(r.usuario || '?')[0].toUpperCase()}</div>`
+              }
+            </div>
+            <div class="c-body">
+              <div class="c-name">${r.usuario || 'Anônimo'}</div>
+              <div class="c-text">"${r.comentario}"</div>
+              <div class="c-foot">
+                <span class="c-time">${ago(r.criado_em)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+  } catch {
+    ratingsFeed.innerHTML = '<div class="empty">Sem avaliações disponíveis.</div>';
+    commentsFeed.innerHTML = '<div class="empty">Sem comentários disponíveis.</div>';
+  }
+}
+
+function setR(n) {
+  selRating = n;
+  document.querySelectorAll('#rf-stars .star').forEach((s, i) => s.classList.toggle('on', i < n));
+}
+
+async function postReview() {
+  if (!curBook) return;
+
+  const comentario = document.getElementById('rf-txt').value.trim();
+  
+  if (selRating === 0 && comentario === "") {
+    alert("Por favor, selecione as estrelas ou escreva um comentário antes de publicar!");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/avaliacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        livro_id: curBook.id, 
+        nota: selRating > 0 ? selRating : null,
+        comentario: comentario !== "" ? comentario : null
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('rf-txt').value = '';
+      selRating = 0;
+      document.querySelectorAll('#rf-stars .star').forEach(s => s.classList.remove('on'));
+      loadReviews(curBook.id);
+    } else {
+      const errData = await res.json();
+      alert(errData.error || "Erro ao publicar avaliação.");
+    }
+  } catch (error) {
+    console.error("Erro ao postar avaliação:", error);
+  }
+}
+
+// CORRIGIDO: Exibe corretamente a imagem de capas dos livros semelhantes
+function renderSimilar(book) {
+  const grid = document.getElementById('d-sim');
+  if (!allBooks || !allBooks.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum livro semelhante mapeado.</div>';
+    return;
+  }
+  
+  const same = allBooks.filter(b => b.id !== book.id && b.genero === book.genero).slice(0, 9);
+  if (!same.length) { 
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Sem similares deste gênero.</div>'; 
+    return; 
+  }
+
+  grid.innerHTML = same.map(b => `
+    <div class="sim-card" onclick="location.href='detalhe.html?id=${b.id}'">
+      <div class="sim-cover">
+        ${b.capa_url ? `<img src="/${b.capa_url}" alt="${b.titulo}">` : `<div class="sim-ph">${b.titulo}</div>`}
+      </div>
+      <div class="sim-stars">${starsHTML(b.media_avaliacao || 0, 9)}</div>
+      <div class="sim-name">${b.titulo}</div>
+    </div>
+  `).join('');
+}
+  </script>
+</body>
+
+</html>

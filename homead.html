@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca — Administrador</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stylead.css">
+<style>
+  /* Pequeno ajuste visual para os seletores de data combinarem com a tabela */
+  .input-data-tabela {
+    font-family: 'Lato', sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 8px;
+    color: #333;
+    background-color: #fff;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+  }
+  .input-data-tabela:focus {
+    border-color: #888;
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="logo">
+    <img src="logo.png" class="logo">
+    <div class="logo-title">Bem vindo</div>
+  </div>
+  <ul class="nav-items">
+    <li><a href="#" class="active" id="nav-registro" onclick="showPanel('registro',this)"><span class="nav-arrow">▶</span> Registro de livros</a></li>
+    <li><a href="#" id="nav-catalogados" onclick="showPanel('catalogados',this)"><span class="nav-arrow">▶</span> Livros catalogados <span class="badge" id="badge-cat">0</span></a></li>
+    <li><a href="#" onclick="showPanel('reservados',this)"><span class="nav-arrow">▶</span> Livros reservados</a></li>
+    <li><a href="#" onclick="showPanel('solicitacoes',this)"><span class="nav-arrow">▶</span> Solicitações de reserva <span class="badge" id="badge-sol">0</span></a></li>
+  </ul>
+ <a href="admin.html" class="sair-btn">⬅ Sair</a>
+</aside>
+
+<main id="main">
+  <div class="ornament-bar">Lumina</div>
+
+  <section class="panel active" id="panel-registro">
+    <div class="panel-title">Registro de livros</div>
+    <div class="form-card">
+      <form id="form-livro" onsubmit="registrarLivro(event)">
+        <div class="form-row">
+          <div class="form-group" style="flex:3; min-width:220px;">
+            <label>Título</label>
+            <input class="form-control" id="titulo" placeholder="Título do livro" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do autor</label>
+            <input class="form-control" id="autor" placeholder="Nome autor" required>
+          </div>
+          <div class="form-group">
+            <label>Gênero literário</label>
+            <input class="form-control" id="genero" placeholder="Gênero literário">
+          </div>
+        </div>
+        <div class="form-row" style="align-items:flex-end;">
+          <div class="form-group">
+            <label>Nº de páginas</label>
+            <input class="form-control" id="num_paginas" type="number" min="1" placeholder="Páginas">
+          </div>
+          <div class="form-group">
+            <label>Editora</label>
+            <input class="form-control" id="editora" placeholder="Editora">
+          </div>
+          <div class="form-group">
+            <label>Ano de lançamento</label>
+            <input class="form-control" id="ano_lancamento" type="number" min="1000" max="2099" placeholder="Ano">
+          </div>
+          <div class="form-group" style="min-width:130px;">
+            <label>Capa do livro</label>
+            <div class="upload-area" onclick="document.getElementById('capa-file').click()" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed #ccc; padding: 10px; border-radius: 4px; height: 110px; box-sizing: border-box;">
+              <input type="file" id="capa-file" accept="image/*" onchange="previewCapa(this)" style="display:none;">
+              <img src="imagens/iconcapa.png" alt="Capa do livro" class="capa-preview" id="capa-preview" style="max-width: 100%; max-height: 60px; object-fit: contain; margin-bottom: 5px;">
+              <span style="font-size: 12px; color: #666;">Adicionar foto</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Resumo</label>
+            <textarea class="form-control" id="resumo" placeholder="Resumo do livro…"></textarea>
+          </div>
+        </div>
+        <div class="form-bottom">
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-catalogados">
+    <div class="panel-title">Livros catalogados</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Capa</th>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Gênero</th>
+            <th>Editora</th>
+            <th>Ano</th>
+            <th>Avaliação</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-catalogados"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty-catalogados" style="display:none">
+      <div class="empty-icon">📚</div>
+      Nenhum livro cadastrado ainda.
+    </div>
+  </section>
+
+  <section class="panel" id="panel-reservados">
+    <div class="panel-title">Livros reservados</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Livro</th>
+            <th>Usuário</th>
+            <th>Data reserva</th>
+            <th>Data devolução</th>
+            <th>Status</th>
+            <th>Ações</th> </tr>
+        </thead>
+        <tbody id="tbody-reservados"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty-reservados" style="display:none">
+      <div class="empty-icon">🔖</div>
+      Nenhum livro reservado.
+    </div>
+  </section>
+
+  <section class="panel" id="panel-solicitacoes">
+    <div class="panel-title">Solicitações de reserva</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Livro</th>
+            <th>Usuário</th>
+            <th>Data solicitada</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-solicitacoes"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty-solicitacoes" style="display:none">
+      <div class="empty-icon">📬</div>
+      Nenhuma solicitação pendente.
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const API = 'http://localhost:3000/api'; 
+let capaBase64 = '';
+const padraoCapa = 'imagens/iconcapa.png';
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function showPanel(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-items a').forEach(a => a.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if(el) el.classList.add('active');
+  
+  if (name === 'catalogados') loadCatalogados();
+  if (name === 'reservados')  loadReservados();
+  if (name === 'solicitacoes') loadSolicitacoes();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg, dur = 3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── Stars ─────────────────────────────────────────────────────────────────
+function stars(n) {
+  n = Math.round(n);
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+// ── Preview capa ──────────────────────────────────────────────────────────
+function previewCapa(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('capa-preview');
+    img.src = e.target.result;
+    capaBase64 = e.target.result;
+    
+    img.style.width = '100%';
+    img.style.height = '60px';
+    img.style.objectFit = 'contain';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ── Registrar livro ───────────────────────────────────────────────────────
+// Manipulador do formulário de cadastro (CORRIGIDO)
+formCadastro.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const fileInput = document.getElementById('cad-capa');
+  let capaBase64 = '';
+
+  // Processa a imagem se ela existir
+  if (fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    capaBase64 = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Monta o objeto exatamente como o backend espera
+  const novoLivro = {
+    titulo: document.getElementById('cad-titulo').value,
+    autor: document.getElementById('cad-autor').value,
+    genero: document.getElementById('cad-genero').value,
+    num_paginas: parseInt(document.getElementById('cad-paginas').value) || 0, // Ajustado o nome do campo
+    editora: document.getElementById('cad-editora').value,
+    ano_lancamento: document.getElementById('cad-ano').value,
+    capa_url: capaBase64 || 'imagens/iconcapa.png'
+  };
+
+  try {
+    const res = await fetch(`${API}/livros`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(novoLivro)
+    });
+
+    if (res.ok) {
+      toast('✅ Livro cadastrado com sucesso!');
+      formCadastro.reset();
+      
+      // Atualiza a tabela de livros catalogados na hora!
+      loadCatalogados();
+      atualizarBadges();
+    } else {
+      const errData = await res.json();
+      toast('❌ Erro ao cadastrar: ' + (errData.error || 'Erro interno'));
+    }
+  } catch (err) {
+    console.error(err);
+    toast('❌ Erro na comunicação com o servidor.');
+  }
+});
+
+function limparFormulario() {
+  document.getElementById('titulo').value = '';
+  document.getElementById('autor').value = '';
+  document.getElementById('genero').value = '';
+  document.getElementById('num_paginas').value = '';
+  document.getElementById('editora').value = '';
+  document.getElementById('ano_lancamento').value = '';
+  document.getElementById('resumo').value = '';
+  document.getElementById('capa-preview').src = padraoCapa;
+  capaBase64 = '';
+}
+
+// ── Carregar catalogados ──────────────────────────────────────────────────
+async function loadCatalogados() {
+  const tbody = document.getElementById('tbody-catalogados');
+  const empty = document.getElementById('empty-catalogados');
+  try {
+    const res  = await fetch(`${API}/livros`);
+    const data = await res.json();
+    renderCatalogados(data, tbody, empty);
+    document.getElementById('badge-cat').textContent = data.length;
+  } catch (err) {
+    console.error("Erro ao carregar catalogados:", err);
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  }
+}
+
+function renderCatalogados(data, tbody, empty) {
+  if (!data || !data.length) { empty.style.display = 'block'; tbody.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(l => `
+    <tr>
+      <td>${l.id}</td>
+      <td>${l.capa_url ? `<img src="${l.capa_url}" style="width:36px;height:50px;object-fit:cover;border-radius:4px;">` : '📖'}</td>
+      <td><strong>${l.titulo}</strong></td>
+      <td>${l.autor}</td>
+      <td>${l.genero || '—'}</td>
+      <td>${l.editora || '—'}</td>
+      <td>${l.ano_lancamento || '—'}</td>
+      <td><span class="stars">${stars(l.media_avaliacao || 0)}</span></td>
+      <td>
+  <span class="status-badge ${l.disponivel ? 'status-disponivel' : 'status-indisponivel'}" style="padding: 4px 8px; display: inline-block; border-radius: 4px;">
+    ${l.disponivel ? 'Disponível' : 'Reservado'}
+  </span>
+    </td>
+      <td class="actions">
+        <button class="btn btn-sm btn-danger" onclick="excluirLivro(${l.id})">Excluir</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Alterar Status via Seletor do Catálogo ───────────────────────────
+async function alterarStatusLivro(id, novoStatus) {
+  const disponivel = parseInt(novoStatus);
+  try {
+    const res = await fetch(`${API}/livros/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disponivel })
+    });
+    
+    if (res.ok) {
+      toast('🔄 Status do livro atualizado no banco!');
+      loadCatalogados();
+    } else {
+      toast('❌ Não foi possível atualizar o status.');
+    }
+  } catch (err) {
+    console.error("Erro ao alterar status do livro:", err);
+    toast('❌ Erro na comunicação com o servidor.');
+  }
+}
+
+// ── Excluir livro (Catalogados) ───────────────────────────────────────────
+async function excluirLivro(id) {
+  if (!confirm('Tem certeza que deseja excluir este livro do acervo?')) return;
+  
+  try {
+    const res = await fetch(`${API}/livros/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if(res.ok) {
+      toast('🗑️ Livro removido com sucesso do banco.');
+      loadCatalogados();
+      atualizarBadges();
+    } else {
+      toast('❌ Erro ao remover livro.');
+    }
+  } catch (err) {
+    console.error("Erro ao excluir livro:", err);
+    toast('❌ Erro na comunicação com o servidor.');
+  }
+}
+
+// ── Salvar Alterações de Data da Reserva ──────────────────────────────────
+async function atualizarDatasReserva(idReserva, campo, novaData) {
+  try {
+    // Envia o campo dinâmico (data_reserva ou data_devolucao) para a rota correspondente do Node
+    const res = await fetch(`${API}/admin/reservas/datas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: idReserva, campo: campo, data: novaData })
+    });
+    
+    if (res.ok) {
+      toast('💾 Data salva com sucesso no banco.');
+    } else {
+      toast('❌ Erro ao salvar data.');
+    }
+  } catch (err) {
+    console.error("Erro ao atualizar data da reserva:", err);
+    toast('❌ Erro de conexão.');
+  }
+}
+
+// ── Carregar reservados ───────────────────────────────────────────────────
+async function loadReservados() {
+  const tbody = document.getElementById('tbody-reservados');
+  const empty = document.getElementById('empty-reservados');
+  try {
+    const res  = await fetch(`${API}/admin/reservas`);
+    const data = (await res.json()).filter(r => r.status === 'aprovada');
+    renderReservados(data, tbody, empty);
+  } catch (err) {
+    console.error("Erro ao carregar reservados:", err);
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  }
+}
+
+// ── Renderizar Reservados ─────────────────────────────────────────────────
+function renderReservados(data, tbody, empty) {
+  if (!data || !data.length) { empty.style.display = 'block'; tbody.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td><strong>${r.titulo}</strong></td>
+      <td>${r.username}</td>
+      <td>
+        <input type="date" class="input-data-tabela" value="${r.data_reserva ? r.data_reserva.split(' ')[0] : ''}" onchange="atualizarDatasReserva(${r.id}, 'data_reserva', this.value)">
+      </td>
+      <td>
+        <input type="date" class="input-data-tabela" value="${r.data_devolucao ? r.data_devolucao.split(' ')[0] : ''}" onchange="atualizarDatasReserva(${r.id}, 'data_devolucao', this.value)">
+      </td>
+      <td><span class="status-badge status-aprovada">Aprovada</span></td>
+      <td class="actions">
+        <button class="btn btn-sm btn-danger" onclick="cancelarReserva(${r.id})">Excluir</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Cancelar/Excluir Reserva Ativa ────────────────────────────────────────
+async function cancelarReserva(id) {
+  if (!confirm('Tem certeza que deseja excluir esta reserva? O livro voltará a ficar disponível.')) return;
+
+  try {
+    const res = await fetch(`${API}/admin/reservas/cancelar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+
+    const data = await res.json();
+    if (data.sucesso) {
+      toast('🗑️ Reserva removida e livro liberado!');
+    } else {
+      toast('❌ Não foi possível remover a reserva.');
+    }
+  } catch (err) {
+    console.error("Erro ao remover reserva:", err);
+    toast('❌ Erro na comunicação com o servidor.');
+  }
+
+  // Recarrega as tabelas para atualizar os dados e os status instantaneamente
+  loadReservados();
+  loadCatalogados();
+  atualizarBadges();
+}
+
+// ── Carregar solicitações ─────────────────────────────────────────────────
+async function loadSolicitacoes() {
+  const tbody = document.getElementById('tbody-solicitacoes');
+  const empty = document.getElementById('empty-solicitacoes');
+  try {
+    const res  = await fetch(`${API}/admin/reservas`);
+    const data = (await res.json()).filter(r => r.status === 'pendente');
+    renderSolicitacoes(data, tbody, empty);
+    document.getElementById('badge-sol').textContent = data.length || '0';
+  } catch (err) {
+    console.error("Erro ao carregar solicitações:", err);
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  }
+}
+
+function renderSolicitacoes(data, tbody, empty) {
+  if (!data || !data.length) { empty.style.display = 'block'; tbody.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td><strong>${r.titulo}</strong></td>
+      <td>${r.username}</td>
+      <td>${formatDate(r.data_reserva)}</td>
+      <td><span class="status-badge status-pendente">Pendente</span></td>
+      <td class="actions">
+        <button class="btn btn-sm btn-success" onclick="atualizarReserva(${r.id},'aprovada')">✔ Aprovar</button>
+        <button class="btn btn-sm btn-danger"  onclick="atualizarReserva(${r.id},'recusada')">✖ Recusar</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Atualizar Status da Reserva (Via Painel Solicitações) ─────────────────
+async function atualizarReserva(id, status) {
+  try {
+    const res = await fetch(`${API}/admin/reservas/atualizar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    });
+    
+    const data = await res.json();
+    if (data.sucesso) {
+      toast(status === 'aprovada' ? '✅ Reserva aprovada!' : '❌ Reserva recusada.');
+    } else {
+      toast('❌ Não foi possível processar a ação.');
+    }
+  } catch (err) {
+    console.error("Erro ao atualizar reserva:", err);
+    toast('❌ Erro na comunicação com o servidor.');
+  }
+
+  // Recarrega todas as tabelas em tempo real após a resposta do backend
+  loadSolicitacoes();
+  loadReservados();
+  loadCatalogados();
+  atualizarBadges();
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────
+async function atualizarBadges() {
+  try {
+    const r1 = await fetch(`${API}/livros`);
+    const d1 = await r1.json();
+    document.getElementById('badge-cat').textContent = d1.length;
+    
+    const r2 = await fetch(`${API}/admin/reservas`);
+    const d2 = await r2.json();
+    const pend = d2.filter(r => r.status === 'pendente').length;
+    document.getElementById('badge-sol').textContent = pend || '0';
+  } catch (err) {
+    console.error("Erro ao atualizar badges:", err);
+  }
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  // Separa apenas a data caso venha com timestamp do SQLite (YYYY-MM-DD hh:mm:ss)
+  const apenasData = d.split(' ')[0];
+  const dt = new Date(apenasData + 'T00:00:00');
+  return dt.toLocaleDateString('pt-BR');
+}
+
+// Configura o evento do formulário quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', registrarLivro);
+  }
+  atualizarBadges();
+});
+</script>
+</body>
+</html>

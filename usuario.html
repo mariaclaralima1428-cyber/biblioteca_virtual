@@ -1,0 +1,1665 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca — Explorar</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --sand: #C4A882;
+            --sand-light: #D9C4A8;
+            --sand-dark: #A8906A;
+            --cream: #F5EDE0;
+            --cream-light: #FAF5EE;
+            --brown-dark: #2C1F14;
+            --brown-mid: #5C3D2E;
+            --brown-text: #3A2415;
+            --white: #FEFCF8;
+            --shadow: 0 8px 32px rgba(44, 31, 20, 0.18);
+            --shadow-sm: 0 2px 12px rgba(44, 31, 20, 0.12);
+            --radius: 18px;
+            --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: var(--cream);
+            color: var(--brown-text);
+            min-height: 100vh;
+        }
+
+        /* ── SPLASH ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: var(--brown-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--sand);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .splash-icon svg {
+            width: 54px;
+            height: 54px;
+            fill: var(--brown-dark);
+        }
+
+        .splash-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            color: var(--sand-light);
+            letter-spacing: 4px;
+        }
+
+        .splash-loader {
+            margin-top: 32px;
+            width: 140px;
+            height: 2px;
+            background: rgba(196, 168, 130, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .splash-loader-bar {
+            height: 100%;
+            width: 0;
+            background: var(--sand);
+            animation: loadBar 1.2s ease forwards 0.2s;
+        }
+
+        @keyframes loadBar {
+            to {
+                width: 100%;
+            }
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(245, 237, 224, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--sand-light);
+            padding: 14px 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .topbar-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--brown-dark);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .topbar-logo svg {
+            width: 26px;
+            height: 26px;
+            fill: var(--brown-dark);
+        }
+
+        .search-wrap {
+            flex: 1;
+            max-width: 560px;
+            display: flex;
+            align-items: center;
+            background: var(--white);
+            border: 2px solid transparent;
+            border-radius: 50px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-wrap:focus-within {
+            border-color: var(--sand-dark);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.95rem;
+            background: transparent;
+            color: var(--brown-text);
+        }
+
+        .search-btn {
+            padding: 12px 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--brown-mid);
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            color: var(--brown-dark);
+        }
+
+        .search-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-left: auto;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: var(--sand);
+            color: var(--brown-dark);
+            border: none;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+        }
+
+        .user-btn:hover {
+            background: var(--sand-dark);
+            color: var(--white);
+        }
+
+        .user-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .logout-btn {
+            padding: 8px 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--brown-mid);
+            font-size: 0.82rem;
+            transition: var(--transition);
+            border-radius: 50px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(92, 61, 46, 0.1);
+            color: var(--brown-dark);
+        }
+
+        /* ── LAYOUT PRINCIPAL ── */
+        .main-wrap {
+            display: flex;
+            min-height: calc(100vh - 65px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            padding: 32px 24px;
+            border-right: 1px solid var(--sand-light);
+            background: rgba(245, 237, 224, 0.5);
+        }
+
+        .sidebar-section {
+            margin-bottom: 28px;
+        }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--brown-mid);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--brown-text);
+            cursor: pointer;
+            font-size: 0.92rem;
+            transition: var(--transition);
+            text-decoration: none;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: var(--sand);
+            color: var(--brown-dark);
+            font-weight: 700;
+        }
+
+        .sidebar-link svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .genre-pill {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--white);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--brown-mid);
+            cursor: pointer;
+            margin: 3px;
+            transition: var(--transition);
+            border: 1px solid var(--sand-light);
+        }
+
+        .genre-pill:hover,
+        .genre-pill.active {
+            background: var(--sand);
+            color: var(--brown-dark);
+            border-color: var(--sand);
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--brown-dark);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ── BOOK GRID ── */
+        .book-row {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 40px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--sand-light) transparent;
+        }
+
+        .book-row::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .book-row::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .book-row::-webkit-scrollbar-thumb {
+            background: var(--sand-light);
+            border-radius: 4px;
+        }
+
+        .book-card {
+            flex-shrink: 0;
+            width: 160px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .book-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .book-cover {
+            width: 160px;
+            height: 220px;
+            border-radius: var(--radius-sm);
+            background: var(--sand-light);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .book-card:hover .book-cover {
+            box-shadow: var(--shadow);
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .book-cover-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--sand-light), var(--sand-dark));
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            color: var(--white);
+            text-align: center;
+            padding: 12px;
+            line-height: 1.3;
+        }
+
+        .book-stars {
+            display: flex;
+            gap: 2px;
+            margin: 10px 0 4px;
+        }
+
+        .star {
+            font-size: 14px;
+            color: var(--sand-dark);
+        }
+
+        .star.filled {
+            color: #D4A017;
+        }
+
+        .book-name {
+            font-size: 0.85rem;
+            color: var(--brown-text);
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .book-author {
+            font-size: 0.78rem;
+            color: var(--brown-mid);
+            margin-top: 2px;
+        }
+
+        /* Reservado badge */
+        .reserved-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(44, 31, 20, 0.85);
+            color: var(--sand-light);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 50px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── GRID FULL ── */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 24px;
+        }
+
+        /* ── MODAL DETALHES ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(44, 31, 20, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.35s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(44, 31, 20, 0.15);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--brown-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(44, 31, 20, 0.25);
+        }
+
+        .modal-top {
+            display: flex;
+            gap: 32px;
+            padding: 36px;
+            position: relative;
+        }
+
+        .modal-cover {
+            width: 180px;
+            height: 250px;
+            flex-shrink: 0;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-cover-ph {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--sand-light), var(--sand-dark));
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            color: var(--white);
+            text-align: center;
+            padding: 12px;
+        }
+
+        .modal-info {
+            flex: 1;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--brown-dark);
+            margin-bottom: 4px;
+        }
+
+        .modal-author {
+            color: var(--brown-mid);
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .modal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .meta-chip {
+            padding: 5px 14px;
+            background: var(--sand-light);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--brown-mid);
+        }
+
+        .modal-stars {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .modal-stars .star {
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        /* Reserva section */
+        .reserva-section {
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+        }
+
+        .reserva-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.livre {
+            background: #4caf50;
+        }
+
+        .status-dot.reservado {
+            background: #e67e22;
+        }
+
+        .status-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .mini-calendar {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .cal-day {
+            text-align: center;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            background: var(--sand-light);
+            min-width: 44px;
+        }
+
+        .cal-day.today {
+            background: var(--brown-dark);
+            color: var(--white);
+        }
+
+        .cal-day .day-name {
+            font-size: 0.65rem;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        .cal-day .day-num {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .cal-day.reserved-range {
+            background: rgba(230, 126, 34, 0.15);
+            color: var(--brown-text);
+        }
+
+        .cal-day.reserved-end {
+            background: #e67e22;
+            color: var(--white);
+        }
+
+        .btn-reservar {
+            padding: 12px 28px;
+            background: var(--brown-dark);
+            color: var(--cream);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            margin-top: 12px;
+        }
+
+        .btn-reservar:hover {
+            background: var(--brown-mid);
+        }
+
+        .btn-reservar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Resumo */
+        .modal-summary {
+            padding: 0 36px 24px;
+        }
+
+        .modal-summary h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--brown-dark);
+        }
+
+        .modal-summary p {
+            line-height: 1.8;
+            color: var(--brown-mid);
+            font-size: 0.95rem;
+        }
+
+        /* Avaliações */
+        .modal-reviews {
+            padding: 0 36px 36px;
+        }
+
+        .modal-reviews h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: var(--brown-dark);
+        }
+
+        .review-form {
+            background: var(--white);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+        }
+
+        .review-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--sand-light);
+            border-radius: var(--radius-sm);
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            color: var(--brown-text);
+            outline: none;
+            background: transparent;
+        }
+
+        .star-select {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        .star-select .star {
+            font-size: 22px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-comment {
+            padding: 10px 22px;
+            background: var(--sand);
+            color: var(--brown-dark);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .btn-comment:hover {
+            background: var(--sand-dark);
+            color: var(--white);
+        }
+
+        .review-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--sand-light);
+        }
+
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--sand-dark);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1rem;
+            overflow: hidden;
+        }
+
+        .review-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .review-body {
+            flex: 1;
+            min-width: 0;
+            /* evita overflow de texto longo */
+        }
+
+        .review-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--brown-dark);
+        }
+
+        .review-text {
+            font-size: 0.88rem;
+            color: var(--brown-mid);
+            margin-top: 4px;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .review-time {
+            font-size: 0.75rem;
+            color: var(--sand-dark);
+            margin-top: 4px;
+        }
+
+        .review-stars {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+
+        .review-stars .star {
+            font-size: 12px;
+        }
+
+        /* Similar books panel */
+        .modal-body-split {
+            display: flex;
+            gap: 0;
+        }
+
+        .modal-main-col {
+            flex: 1;
+        }
+
+        .modal-similar {
+            width: 280px;
+            flex-shrink: 0;
+            background: var(--sand-light);
+            padding: 24px;
+            border-left: 1px solid var(--sand);
+        }
+
+        .modal-similar h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: var(--brown-dark);
+        }
+
+        .similar-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .similar-card {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .similar-card:hover {
+            transform: scale(1.05);
+        }
+
+        .similar-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--sand);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 4px;
+        }
+
+        .similar-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .similar-cover-ph {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--sand), var(--sand-dark));
+            font-size: 0.6rem;
+            color: var(--white);
+            text-align: center;
+            padding: 4px;
+        }
+
+        .similar-name {
+            font-size: 0.7rem;
+            color: var(--brown-text);
+            line-height: 1.2;
+        }
+
+        .similar-stars {
+            display: flex;
+            gap: 1px;
+            margin: 2px 0;
+        }
+
+        .similar-stars .star {
+            font-size: 9px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            padding: 14px 24px;
+            background: var(--brown-dark);
+            color: var(--cream);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #2d6a30;
+        }
+
+        .toast.error {
+            background: #8b1a1a;
+        }
+
+        /* Perfil page */
+        .profile-wrap {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 28px;
+            padding: 32px;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 28px;
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--sand-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2.5rem;
+            font-weight: 700;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-role {
+            font-size: 0.75rem;
+            color: var(--brown-mid);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .profile-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--brown-dark);
+            margin-bottom: 8px;
+        }
+
+        .profile-bio {
+            color: var(--brown-mid);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            background: var(--sand-light);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 10px 22px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: var(--white);
+            color: var(--brown-mid);
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            background: var(--brown-dark);
+            color: var(--cream);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.4s ease both;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--brown-mid);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.3;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--sand-light) 25%, var(--cream-light) 50%, var(--sand-light) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: var(--radius-sm);
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @media(max-width:768px) {
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .modal-body-split {
+                flex-direction: column;
+            }
+
+            .modal-similar {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--sand);
+            }
+
+            .similar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SPLASH -->
+    <div id="splash">
+        <div class="splash-icon">
+            <svg viewBox="0 0 64 64">
+                <path d="M8 10h20c2.2 0 4 1.8 4 4v36c0-2.2-1.8-4-4-4H8V10z" />
+                <path d="M56 10H36c-2.2 0-4 1.8-4 4v36c0-2.2 1.8-4 4-4h20V10z" />
+                <path d="M6 46h22c2.2 0 4 1.8 4 4H6V46z" />
+                <path d="M58 46H36c-2.2 0-4 1.8-4 4h26V46z" />
+            </svg>
+        </div>
+        <div class="splash-title">BIBLIOTECA</div>
+        <div class="splash-loader">
+            <div class="splash-loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="#" class="topbar-logo" onclick="showView('home')">
+            <svg viewBox="0 0 64 64">
+                <path d="M8 10h20c2.2 0 4 1.8 4 4v36c0-2.2-1.8-4-4-4H8V10z" />
+                <path d="M56 10H36c-2.2 0-4 1.8-4 4v36c0-2.2 1.8-4 4-4h20V10z" />
+                <path d="M6 46h22c2.2 0 4 1.8 4 4H6V46z" />
+                <path d="M58 46H36c-2.2 0-4 1.8-4 4h26V46z" />
+            </svg>
+            BIBLIOTEKA
+        </a>
+        <div class="search-wrap">
+            <input class="search-input" id="search-input" placeholder="Buscar livros, autores, gêneros..."
+                onkeydown="if(event.key==='Enter')doSearch()">
+            <button class="search-btn" onclick="doSearch()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+            </button>
+        </div>
+        <div class="topbar-right">
+            <button class="user-btn" onclick="showView('perfil')">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 12c2.7 0 4-1.3 4-4s-1.3-4-4-4-4 1.3-4 4 1.3 4 4 4zm0 2c-2.7 0-8 1.35-8 4v2h16v-2c0-2.65-5.3-4-8-4z" />
+                </svg>
+                <span id="topbar-username">Usuário</span>
+            </button>
+            <button class="logout-btn" onclick="doLogout()">Sair</button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main-wrap">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-label">Menu</div>
+                <a class="sidebar-link active" id="nav-home" onclick="showView('home')">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                    </svg>
+                    Início
+                </a>
+                <a class="sidebar-link" id="nav-perfil" onclick="showView('perfil')">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 12c2.7 0 4-1.3 4-4s-1.3-4-4-4-4 1.3-4 4 1.3 4 4 4zm0 2c-2.7 0-8 1.35-8 4v2h16v-2c0-2.65-5.3-4-8-4z" />
+                    </svg>
+                    Meu Perfil
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Gêneros</div>
+                <div id="genre-pills"></div>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+            <!-- HOME VIEW -->
+            <div id="view-home">
+                <div id="home-content">
+                    <div class="section-title">
+                        <span id="section-label">📚 Todos os livros</span>
+                    </div>
+                    <div class="books-grid" id="books-grid"></div>
+                </div>
+            </div>
+
+            <!-- PERFIL VIEW -->
+            <div id="view-perfil" style="display:none">
+                <div class="profile-wrap">
+                    <div class="profile-header fade-in">
+                        <div class="profile-avatar-wrap">
+                            <div class="profile-avatar" id="profile-avatar">?</div>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-role">leitor</div>
+                            <div class="profile-name" id="profile-name">—</div>
+                            <div class="profile-bio" id="profile-bio">Sem bio.</div>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('reservados')">📖 Livros Reservados</button>
+                        <button class="tab" onclick="switchTab('avaliacoes')">⭐ Minhas Avaliações</button>
+                    </div>
+                    <div class="tab-content active" id="tab-reservados">
+                        <div class="books-grid" id="reserved-grid"></div>
+                    </div>
+                    <div class="tab-content" id="tab-avaliacoes">
+                        <div class="books-grid" id="rated-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DETALHES DO LIVRO -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" id="modal-book">
+            <button class="modal-close" onclick="closeModalForce()">✕</button>
+            <div class="modal-body-split">
+                <!-- Coluna principal -->
+                <div class="modal-main-col">
+                    <div class="modal-top">
+                        <div class="modal-cover" id="modal-cover"></div>
+                        <div class="modal-info">
+                            <div class="modal-title" id="modal-title">—</div>
+                            <div class="modal-author" id="modal-author">—</div>
+                            <div class="modal-meta" id="modal-meta"></div>
+                            <div class="modal-stars" id="modal-stars"></div>
+                            <!-- RESERVA -->
+                            <div class="reserva-section" id="reserva-section">
+                                <div class="reserva-status">
+                                    <div class="status-dot" id="status-dot"></div>
+                                    <span class="status-label" id="status-label">—</span>
+                                </div>
+                                <div id="calendar-wrap"></div>
+                                <button class="btn-reservar" id="btn-reservar" onclick="solicitarReserva()">Solicitar
+                                    Reserva</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-summary">
+                        <h4>Resumo</h4>
+                        <p id="modal-resumo">—</p>
+                    </div>
+                    <div class="modal-reviews">
+                        <h4>Avaliações</h4>
+                        <div class="review-form">
+                            <div class="star-select" id="star-select">
+                                <span class="star" onclick="setRating(1)">★</span>
+                                <span class="star" onclick="setRating(2)">★</span>
+                                <span class="star" onclick="setRating(3)">★</span>
+                                <span class="star" onclick="setRating(4)">★</span>
+                                <span class="star" onclick="setRating(5)">★</span>
+                            </div>
+                            <textarea id="comment-input" placeholder="Deixe um comentário sobre o livro..."></textarea>
+                            <button class="btn-comment" onclick="submitReview()">Publicar avaliação</button>
+                        </div>
+                        <div id="reviews-list"></div>
+                    </div>
+                </div>
+                <!-- Livros similares -->
+                <div class="modal-similar">
+                    <h4>Livros semelhantes</h4>
+                    <div class="similar-grid" id="similar-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+
+    <script>
+        const API = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const usuario = localStorage.getItem('usuario');
+
+        // Auth guard
+        if (!token || localStorage.getItem('is_admin') === '1') {
+            window.location.href = 'index.html';
+        }
+
+        // Splash
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1800);
+            document.getElementById('topbar-username').textContent = usuario || 'Usuário';
+            loadAllBooks();
+            loadGenres();
+        });
+
+        // ─── STATE ───────────────────────────────────────
+        let allBooks = [];
+        let currentBook = null;
+        let selectedRating = 0;
+        let currentView = 'home';
+
+        // ─── HELPERS ─────────────────────────────────────
+        const authHeaders = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` });
+
+        function toast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.className = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3200);
+        }
+
+        function stars(n, total = 5) {
+            return Array.from({ length: total }, (_, i) =>
+                `<span class="star ${i < Math.round(n) ? 'filled' : ''}">★</span>`
+            ).join('');
+        }
+
+        function coverHTML(capa_url, titulo, size = 'normal') {
+            if (capa_url) return `<img src="${API.replace('/api', '')}${capa_url}" alt="${titulo}" loading="lazy">`;
+            return `<div class="${size === 'small' ? 'similar-cover-ph' : 'book-cover-placeholder'}">${titulo}</div>`;
+        }
+
+        function timeSince(dateStr) {
+            const diff = (Date.now() - new Date(dateStr)) / 1000;
+            if (diff < 60) return 'agora';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min atrás';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h atrás';
+            return Math.floor(diff / 86400) + 'd atrás';
+        }
+
+        // ─── NAVIGATION ──────────────────────────────────
+        function showView(view) {
+            currentView = view;
+            document.getElementById('view-home').style.display = view === 'home' ? 'block' : 'none';
+            document.getElementById('view-perfil').style.display = view === 'perfil' ? 'block' : 'none';
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const navEl = document.getElementById(`nav-${view}`);
+            if (navEl) navEl.classList.add('active');
+            if (view === 'perfil') loadProfile();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab,.tab-content').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        function doLogout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // ─── BOOKS ───────────────────────────────────────
+        async function loadAllBooks(query = '', genero = '') {
+            const grid = document.getElementById('books-grid');
+            grid.innerHTML = Array(8).fill().map(() =>
+                `<div><div class="book-cover skeleton" style="width:160px;height:220px;margin-bottom:10px;"></div><div class="skeleton" style="height:14px;width:80%;margin-bottom:6px;border-radius:4px;"></div></div>`
+            ).join('');
+
+            let url = `${API}/livros?`;
+            if (query) url += `q=${encodeURIComponent(query)}&`;
+            if (genero) url += `genero=${encodeURIComponent(genero)}`;
+
+            try {
+                const res = await fetch(url);
+                allBooks = await res.json();
+                renderBooks(allBooks, grid);
+                const label = document.getElementById('section-label');
+                if (query) label.innerHTML = `🔍 Resultados para "<em>${query}</em>"`;
+                else if (genero) label.innerHTML = `📗 ${genero}`;
+                else label.textContent = '📚 Todos os livros';
+            } catch { grid.innerHTML = '<p style="color:var(--brown-mid)">Erro ao carregar livros.</p>'; }
+        }
+
+        function renderBooks(books, container) {
+            if (!books.length) {
+                container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>Nenhum livro encontrado.</p></div>`;
+                return;
+            }
+            container.innerHTML = books.map(b => `
+    <div class="book-card fade-in" onclick="openBook(${b.id})">
+      <div class="book-cover">
+        ${coverHTML(b.capa_url, b.titulo)}
+        ${b.reserva_status === 'aprovada' ? '<div class="reserved-badge">Reservado</div>' : ''}
+      </div>
+      <div class="book-stars">${stars(b.media_avaliacao || 0)}</div>
+      <div class="book-name">${b.titulo}</div>
+      <div class="book-author">${b.autor}</div>
+    </div>
+  `).join('');
+        }
+
+        async function loadGenres() {
+            try {
+                const res = await fetch(`${API}/livros`);
+                const books = await res.json();
+                const genres = [...new Set(books.map(b => b.genero).filter(Boolean))];
+                const container = document.getElementById('genre-pills');
+                container.innerHTML = genres.map(g =>
+                    `<span class="genre-pill" onclick="filterGenre(this,'${g}')">${g}</span>`
+                ).join('');
+            } catch { }
+        }
+
+        function filterGenre(el, genero) {
+            document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            showView('home');
+            loadAllBooks('', genero);
+        }
+
+        function doSearch() {
+            const q = document.getElementById('search-input').value.trim();
+            if (q) { showView('home'); loadAllBooks(q); }
+        }
+
+        // ─── BOOK MODAL ───────────────────────────────────
+        async function openBook(id) {
+            try {
+                const res = await fetch(`${API}/livros/${id}`);
+                currentBook = await res.json();
+                renderModal(currentBook);
+                document.getElementById('modal-overlay').classList.add('open');
+                document.body.style.overflow = 'hidden';
+                loadReviews(id);
+                loadSimilarBooks(currentBook);
+            } catch { toast('Erro ao carregar livro.', 'error'); }
+        }
+
+        function renderModal(b) {
+            // Cover
+            const coverEl = document.getElementById('modal-cover');
+            coverEl.innerHTML = b.capa_url
+                ? `<img src="${API.replace('/api', '')}${b.capa_url}" alt="${b.titulo}">`
+                : `<div class="modal-cover-ph">${b.titulo}</div>`;
+
+            document.getElementById('modal-title').textContent = b.titulo;
+            document.getElementById('modal-author').textContent = 'por ' + b.autor;
+            document.getElementById('modal-resumo').textContent = b.resumo || 'Sem resumo disponível.';
+
+            // Meta chips
+            const meta = document.getElementById('modal-meta');
+            const chips = [b.genero, b.editora, b.ano_lancamento && `${b.ano_lancamento}`, b.num_paginas && `${b.num_paginas} pág.`].filter(Boolean);
+            meta.innerHTML = chips.map(c => `<span class="meta-chip">${c}</span>`).join('');
+
+            // Stars display
+            document.getElementById('modal-stars').innerHTML = `
+    ${stars(b.media_avaliacao || 0, 5)}
+    <span style="font-size:0.82rem;color:var(--brown-mid);margin-left:6px">${b.media_avaliacao ? b.media_avaliacao.toFixed(1) : 'Sem avaliações'} (${b.total_avaliacoes || 0})</span>
+  `;
+
+            // Reserva
+            renderReservaSection(b);
+
+            // Reset review form
+            selectedRating = 0;
+            updateStarUI();
+            document.getElementById('comment-input').value = '';
+        }
+
+        function renderReservaSection(b) {
+            const dot = document.getElementById('status-dot');
+            const label = document.getElementById('status-label');
+            const calWrap = document.getElementById('calendar-wrap');
+            const btnReservar = document.getElementById('btn-reservar');
+
+            const isReservado = b.reserva_status === 'aprovada';
+            dot.className = `status-dot ${isReservado ? 'reservado' : 'livre'}`;
+            label.textContent = isReservado ? '🔒 Reservado' : '✅ Disponível';
+
+            calWrap.innerHTML = '';
+            if (isReservado && b.reservado_ate) {
+                const endDate = new Date(b.reservado_ate);
+                const today = new Date();
+                // Mini calendar: show week around today
+                const days = [];
+                for (let i = -2; i <= 4; i++) {
+                    const d = new Date(today); d.setDate(today.getDate() + i);
+                    days.push(d);
+                }
+                const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                calWrap.innerHTML = `
+      <p style="font-size:0.8rem;color:var(--brown-mid);margin-bottom:8px">
+        Reservado até: <strong>${endDate.toLocaleDateString('pt-BR')}</strong>
+      </p>
+      <div class="mini-calendar">
+        ${days.map(d => {
+                    const isToday = d.toDateString() === today.toDateString();
+                    const isEnd = d.toDateString() === endDate.toDateString();
+                    const inRange = d > today && d < endDate;
+                    let cls = 'cal-day';
+                    if (isToday) cls += ' today';
+                    if (isEnd) cls += ' reserved-end';
+                    else if (inRange) cls += ' reserved-range';
+                    return `<div class="${cls}"><div class="day-name">${dayNames[d.getDay()]}</div><div class="day-num">${d.getDate()}</div></div>`;
+                }).join('')}
+      </div>`;
+                btnReservar.textContent = 'Entrar na fila de espera';
+                btnReservar.disabled = false;
+            } else {
+                btnReservar.textContent = 'Solicitar Reserva';
+                btnReservar.disabled = false;
+            }
+        }
+
+        async function solicitarReserva() {
+            if (!currentBook) return;
+            // Default: 14 days
+            const devol = new Date(); devol.setDate(devol.getDate() + 14);
+            const data_devolucao = devol.toISOString().split('T')[0];
+            try {
+                const res = await fetch(`${API}/reservas`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ livro_id: currentBook.id, data_devolucao })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Erro ao solicitar.', 'error');
+                toast(data.mensagem || 'Solicitação enviada!', 'success');
+                document.getElementById('btn-reservar').disabled = true;
+                document.getElementById('btn-reservar').textContent = 'Aguardando aprovação';
+            } catch { toast('Erro ao conectar.', 'error'); }
+        }
+
+        function closeModal(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeModalForce();
+        }
+        function closeModalForce() {
+            document.getElementById('modal-overlay').classList.remove('open');
+            document.body.style.overflow = 'auto';
+            currentBook = null;
+        }
+
+        // ─── REVIEWS ─────────────────────────────────────
+        async function loadReviews(bookId) {
+            try {
+                const res = await fetch(`${API}/livros/${bookId}/avaliacoes`);
+                const reviews = await res.json();
+                const list = document.getElementById('reviews-list');
+                if (!reviews.length) { list.innerHTML = `<p style="color:var(--brown-mid);font-style:italic;font-size:0.9rem;">Seja o primeiro a avaliar!</p>`; return; }
+                list.innerHTML = reviews.map(r => `
+      <div class="review-item">
+        <div class="review-avatar">
+          ${r.foto_perfil ? `<img src="${API.replace('/api', '')}${r.foto_perfil}">` : r.usuario[0].toUpperCase()}
+        </div>
+        <div class="review-body">
+          <div class="review-name">${r.usuario}</div>
+          <div class="review-stars">${stars(r.nota)}</div>
+          ${r.comentario ? `<div class="review-text">${r.comentario}</div>` : ''}
+          <div class="review-time">${timeSince(r.criado_em)}</div>
+        </div>
+      </div>
+    `).join('');
+            } catch { }
+        }
+
+        function setRating(n) {
+            selectedRating = n;
+            updateStarUI();
+        }
+        function updateStarUI() {
+            document.querySelectorAll('#star-select .star').forEach((s, i) => {
+                s.style.color = i < selectedRating ? '#D4A017' : 'var(--sand-dark)';
+            });
+        }
+
+        async function submitReview() {
+            if (!currentBook) return;
+            if (!selectedRating) return toast('Selecione uma nota.', 'error');
+            const comentario = document.getElementById('comment-input').value.trim();
+            try {
+                const res = await fetch(`${API}/avaliacoes`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ livro_id: currentBook.id, nota: selectedRating, comentario })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Erro.', 'error');
+                toast('Avaliação publicada!', 'success');
+                loadReviews(currentBook.id);
+                // Refresh book data
+                const bRes = await fetch(`${API}/livros/${currentBook.id}`);
+                currentBook = await bRes.json();
+                document.getElementById('modal-stars').innerHTML = `
+      ${stars(currentBook.media_avaliacao || 0, 5)}
+      <span style="font-size:0.82rem;color:var(--brown-mid);margin-left:6px">${currentBook.media_avaliacao ? currentBook.media_avaliacao.toFixed(1) : '—'} (${currentBook.total_avaliacoes || 0})</span>
+    `;
+            } catch { toast('Erro ao publicar.', 'error'); }
+        }
+
+        // ─── SIMILAR BOOKS ────────────────────────────────
+        function loadSimilarBooks(book) {
+            const same = allBooks.filter(b => b.id !== book.id && b.genero === book.genero).slice(0, 9);
+            const grid = document.getElementById('similar-grid');
+            if (!same.length) { grid.innerHTML = '<p style="font-size:0.8rem;color:var(--brown-mid);grid-column:1/-1">Sem livros similares.</p>'; return; }
+            grid.innerHTML = same.map(b => `
+    <div class="similar-card" onclick="openBook(${b.id})">
+      <div class="similar-cover">
+        ${b.capa_url ? `<img src="${API.replace('/api', '')}${b.capa_url}" alt="${b.titulo}">` : `<div class="similar-cover-ph">${b.titulo}</div>`}
+      </div>
+      <div class="similar-stars">${stars(b.media_avaliacao || 0)}</div>
+      <div class="similar-name">${b.titulo}</div>
+    </div>
+  `).join('');
+        }
+
+        // ─── PROFILE ─────────────────────────────────────
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API}/perfil`, { headers: authHeaders() });
+                const u = await res.json();
+                document.getElementById('profile-name').textContent = u.usuario;
+                document.getElementById('profile-bio').textContent = u.bio || 'Sem bio.';
+                const av = document.getElementById('profile-avatar');
+                av.innerHTML = u.foto_perfil ? `<img src="${API.replace('/api', '')}${u.foto_perfil}">` : u.usuario[0].toUpperCase();
+            } catch { }
+
+            // Load reserved books
+            try {
+                const res = await fetch(`${API}/minhas-reservas`, { headers: authHeaders() });
+                const reservas = await res.json();
+                const grid = document.getElementById('reserved-grid');
+                if (!reservas.length) {
+                    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>Nenhum livro reservado ainda.</p></div>`;
+                } else {
+                    renderBooks(reservas.map(r => ({ ...r, titulo: r.titulo, autor: r.autor, capa_url: r.capa_url })), grid);
+                }
+            } catch { }
+        }
+    </script>
+</body>
+
+</html>

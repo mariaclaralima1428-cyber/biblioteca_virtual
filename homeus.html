@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca — Acervo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styleus.css">
+</head>
+<body>
+<!-- ════════════════════════ TOPBAR ════════════════════════ -->
+<header id="topbar">
+  <div class="topbar-logo">
+    <img src="logo.png" class="logo">
+  </div>
+ <div class="topbar-user" onclick="window.location.href='perfil.html'" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+    <div id="topbar-avatar-target" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%;">
+        </div>
+    <span id="topbar-user-name">FULANINHA123</span>
+</div>
+</header>
+<!-- ════════════════════════ CONTENT ════════════════════════ -->
+<div id="content">
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-bar">
+      <input id="search-input" type="text" placeholder="Pesquisa" oninput="onSearch()">
+      <button onclick="onSearch()">🔍</button>
+    </div>
+  </div>
+  <!-- Genre pills -->
+  <div class="genre-pills" id="genre-pills">
+    <button class="pill active" onclick="filterGenre('',this)">Todos</button>
+  </div>
+  <!-- ── Search results (hidden until user searches) ── -->
+  <div class="results-section" id="results-section">
+    <div class="section-head">
+      <h2>Resultados da pesquisa</h2>
+    </div>
+    <div class="results-grid" id="results-grid"></div>
+  </div>
+  <!-- ── Books by genre carousels ─────────────────────── -->
+  <div id="carousels-container"></div>
+  <!-- ── Banner carousel ──────────────────────────────── -->
+  <div class="banner-section" id="banner-section">
+    <div class="banner-wrap">
+      <div class="banners-track" id="banners-track"></div>
+      <button class="banner-nav-btn prev" onclick="bannerNav(-1)">‹</button>
+      <button class="banner-nav-btn next" onclick="bannerNav(1)">›</button>
+    </div>
+    <div class="banner-dots" id="banner-dots"></div>
+  </div>
+</div>
+<script>
+const API = 'http://localhost:3000/api';
+let allBooks = [];
+let generos = [];
+let carouselOffsets = {};
+let bannerIndex = 0;
+let bannerTotal = 0;
+let bannerTimer;
+// ── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadBooks();
+  loadBanners();
+});
+// ── Load books ────────────────────────────────────────────────────────────
+async function loadBooks() {
+  try {
+    const res = await fetch(`${API}?action=listar_livros`);
+    allBooks = await res.json();
+  } catch {
+    allBooks = getDemoBooks();
+  }
+  buildGenrePills();
+  buildCarousels();
+}
+function buildGenrePills() {
+  generos = [...new Set(allBooks.map(b => b.genero).filter(Boolean))];
+  const pills = document.getElementById('genre-pills');
+  generos.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'pill';
+    btn.textContent = g;
+    btn.onclick = () => filterGenre(g, btn);
+    pills.appendChild(btn);
+  });
+}
+function buildCarousels() {
+  const container = document.getElementById('carousels-container');
+  container.innerHTML = '';
+  const groups = {};
+  allBooks.forEach(b => {
+    const g = b.genero || 'Sem gênero';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(b);
+  });
+  Object.entries(groups).forEach(([genre, books]) => {
+    const id = 'car-' + genre.replace(/\s+/g, '_');
+    carouselOffsets[id] = 0;
+    const section = document.createElement('div');
+    section.innerHTML = `
+      <div class="section-head">
+        <h2>Gênero literário — ${genre}</h2>
+        <div class="carousel-nav">
+          <button class="caret-btn" onclick="carouselShift('${id}',-1)">&#8249;</button>
+          <button class="caret-btn" onclick="carouselShift('${id}',1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="books-row-wrap">
+        <div class="books-row" id="${id}">
+          ${books.map(b => bookCardHTML(b)).join('')}
+        </div>
+      </div>`;
+    container.appendChild(section);
+  });
+}
+function bookCardHTML(b) {
+  const starsHtml = [1,2,3,4,5].map(i =>
+    `<span class="s ${i <= Math.round(b.media_nota||b.media_avaliacao||0) ? 'on':''}">★</span>`
+  ).join('');
+  const cover = b.capa_url
+    ? `<img src="${b.capa_url}" alt="${b.titulo}">`
+    : `<div class="no-cover"><span>📖</span>${b.titulo}</div>`;
+  return `
+    <div class="book-card" onclick="abrirLivro(${b.id})">
+      <div class="book-cover">${cover}</div>
+      <div class="book-stars">${starsHtml}</div>
+      <div class="book-name">${b.titulo}</div>
+    </div>`;
+}
+// ── Carousel shift ────────────────────────────────────────────────────────
+function carouselShift(id, dir) {
+  const row = document.getElementById(id);
+  const cards = row.querySelectorAll('.book-card');
+  const cardW = 160 + 18; // width + gap
+  const visible = Math.floor(row.parentElement.offsetWidth / cardW);
+  const max = Math.max(0, cards.length - visible);
+  carouselOffsets[id] = Math.min(Math.max(0, carouselOffsets[id] + dir), max);
+  row.style.transform = `translateX(-${carouselOffsets[id] * cardW}px)`;
+}
+// ── Search / filter ───────────────────────────────────────────────────────
+let searchTimer;
+function onSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(doSearch, 300);
+}
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const rs = document.getElementById('results-section');
+  const rg = document.getElementById('results-grid');
+  const cc = document.getElementById('carousels-container');
+  if (!q) {
+    rs.classList.remove('visible');
+    cc.style.display = '';
+    return;
+  }
+  const filtered = allBooks.filter(b =>
+    b.titulo?.toLowerCase().includes(q) ||
+    b.autor?.toLowerCase().includes(q) ||
+    b.genero?.toLowerCase().includes(q) ||
+    b.editora?.toLowerCase().includes(q)
+  );
+  rs.classList.add('visible');
+  cc.style.display = 'none';
+  rg.innerHTML = filtered.length
+    ? filtered.map(b => bookCardHTML(b)).join('')
+    : '<p style="color:#fff;grid-column:1/-1;text-align:center;padding:40px;">Nenhum livro encontrado.</p>';
+}
+function filterGenre(genre, btn) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('search-input').value = '';
+  const cc = document.getElementById('carousels-container');
+  const rs = document.getElementById('results-section');
+  rs.classList.remove('visible');
+  if (!genre) {
+    cc.style.display = '';
+    buildCarousels();
+    return;
+  }
+  const filtered = allBooks.filter(b => b.genero === genre);
+  const rg = document.getElementById('results-grid');
+  rs.classList.add('visible');
+  cc.style.display = 'none';
+  rg.innerHTML = filtered.map(b => bookCardHTML(b)).join('');
+}
+// ── Open book detail ──────────────────────────────────────────────────────
+// ── Load books (Atualizado para salvar o fallback) ───────────────────────
+async function loadBooks() {
+  try {
+    // CORREÇÃO: Apontando para a rota correta configurada no Express do backend
+    const res = await fetch(`${API}/livros`);
+    allBooks = await res.json();
+  } catch (err) {
+    console.error("Erro ao conectar à API, usando dados fictícios:", err);
+    allBooks = getDemoBooks();
+    localStorage.setItem('fallback_books', JSON.stringify(allBooks));
+  }
+  buildGenrePills();
+  buildCarousels();
+}
+// ── Open book detail (Corrigido para detalhe.html) ────────────────────────
+function abrirLivro(id) {
+  window.location.href = `detalhe.html?id=${id}`;
+}
+// ── Load banners ──────────────────────────────────────────────────────────
+async function loadBanners() {
+  let banners;
+  try {
+    const res = await fetch(`${API}?action=listar_anuncios`);
+    banners = await res.json();
+  } catch {
+    banners = getDemoBanners();
+  }
+  renderBanners(banners);
+}
+function renderBanners(banners) {
+  if (!banners.length) return;
+  bannerTotal = banners.length;
+  const track = document.getElementById('banners-track');
+  const dots = document.getElementById('banner-dots');
+  const colors = [
+    ['#1e1a14','#3b2f22'],
+    ['#14202e','#22384a'],
+    ['#1a1e14','#2f3b22'],
+  ];
+  track.innerHTML = banners.map((b, i) => {
+    const [c1,c2] = colors[i % colors.length];
+    return `
+    <div class="banner-slide" style="background:linear-gradient(90deg,${c1} 0%,${c2} 100%)">
+      <div class="banner-img-area">
+        <svg class="banner-books-svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="60" width="45" height="130" rx="5" fill="#8b2020"/>
+          <rect x="23" y="63" width="39" height="124" rx="4" fill="#a83030"/>
+          <line x1="29" y1="100" x2="58" y2="100" stroke="#8b2020" stroke-width="2"/>
+          <text x="30" y="82" fill="#fff" font-size="9" font-family="serif">FAIRY</text>
+          <text x="32" y="93" fill="#fff" font-size="9" font-family="serif">TALES</text>
+          <rect x="68" y="40" width="50" height="150" rx="5" fill="#2a4a8a"/>
+          <rect x="71" y="43" width="44" height="144" rx="4" fill="#3560aa"/>
+          <text x="78" y="115" fill="#fff" font-size="10" font-family="serif" writing-mode="tb">CLASSIC</text>
+          <rect x="122" y="50" width="42" height="140" rx="5" fill="#3a7a4a"/>
+          <rect x="125" y="53" width="36" height="134" rx="4" fill="#4a9a5a"/>
+          <rect x="168" y="70" width="38" height="120" rx="5" fill="#8a6a20"/>
+          <rect x="171" y="73" width="32" height="114" rx="4" fill="#aa8a30"/>
+          <rect x="210" y="80" width="35" height="110" rx="5" fill="#6a2a8a"/>
+          <ellipse cx="140" cy="100" rx="18" ry="10" fill="#1a1000" opacity=".5"/>
+          <ellipse cx="80" cy="90" rx="12" ry="7" fill="#1a1000" opacity=".4"/>
+          <ellipse cx="180" cy="52" rx="22" ry="8" fill="#2a3a5a"/>
+          <rect x="158" y="44" width="44" height="30" rx="5" fill="#3a4a7a"/>
+          <path d="M202 52 Q220 52 220 62 Q220 72 202 72" stroke="#3a4a7a" stroke-width="6" fill="none"/>
+          <ellipse cx="180" cy="44" rx="22" ry="5" fill="#4a5a9a"/>
+          <ellipse cx="180" cy="40" rx="6" ry="10" fill="#3a8a6a" transform="rotate(20 180 40)"/>
+        </svg>
+      </div>
+      <div class="banner-text-area">
+        <span class="banner-tag">LOREM IPSUM</span>
+        <div class="banner-title">${b.titulo || 'WORLD\nBOOK DAY'}</div>
+        <p class="banner-desc">${b.descricao || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In a nulla egestas, posuere metus interdum, euismod metus.'}</p>
+      </div>
+    </div>`;
+  }).join('');
+  dots.innerHTML = banners.map((_, i) =>
+    `<div class="banner-dot ${i===0?'active':''}" onclick="gotoBanner(${i})"></div>`
+  ).join('');
+  startBannerTimer();
+}
+function gotoBanner(i) {
+  bannerIndex = i;
+  document.getElementById('banners-track').style.transform = `translateX(-${i * 100}%)`;
+  document.querySelectorAll('.banner-dot').forEach((d,j) => d.classList.toggle('active', j===i));
+}
+function bannerNav(dir) {
+  clearTimeout(bannerTimer);
+  bannerIndex = (bannerIndex + dir + bannerTotal) % bannerTotal;
+  gotoBanner(bannerIndex);
+  startBannerTimer();
+}
+function startBannerTimer() {
+  bannerTimer = setTimeout(() => {
+    bannerIndex = (bannerIndex + 1) % bannerTotal;
+    gotoBanner(bannerIndex);
+    startBannerTimer();
+  }, 5000);
+}
+// ── Demo data ─────────────────────────────────────────────────────────────
+function getDemoBooks() {
+  return [
+    {id:1, titulo:'Dom Casmurro', autor:'Machado de Assis', genero:'Romance', media_nota:4.8, total_avaliacoes:24, capa_url:'Dom Casmurro.jpg', disponivel:1},
+    {id:2, titulo:'Grande Sertão: Veredas', autor:'João Guimarães Rosa', genero:'Romance', media_nota:4.7, total_avaliacoes:19, capa_url:'Grande Sertão Veredas.jpg', disponivel:1},
+    {id:3, titulo:'Capitães da Areia', autor:'Jorge Amado', genero:'Romance', media_nota:4.6, total_avaliacoes:31, capa_url:'Capitães da Areia.jpg', disponivel:0},
+    {id:4, titulo:'Como Desvendar seu Próprio Assassinato', autor:'Kristen Perrin', genero:'Suspense', media_nota:4.2, total_avaliacoes:15, capa_url:'Como Desvendar seu Próprio Assassinato.jpg', disponivel:1},
+    {id:5, titulo:'Memórias Póstumas de Brás Cubas', autor:'Machado de Assis', genero:'Romance', media_nota:4.9, total_avaliacoes:42, capa_url:'O Cortiço.jpg', disponivel:1},
+    {id:6, titulo:'O Alienista', autor:'Machado de Assis', genero:'Conto', media_nota:4.5, total_avaliacoes:9, capa_url:'O Alienista.jpg', disponivel:1},
+    {id:7, titulo:'A Hora da Estrela', autor:'Clarice Lispector', genero:'Conto', media_nota:5, total_avaliacoes:18, capa_url:'A Hora da Estrela.jpg', disponivel:1},
+    {id:8, titulo:'Macunaíma', autor:'Mário de Andrade', genero:'Modernismo', media_nota:3.5, total_avaliacoes:7, capa_url:'Macunaíma.jpg', disponivel:1},
+    {id:9, titulo:'Iracema', autor:'José de Alencar', genero:'Romantismo', media_nota:4, total_avaliacoes:11, capa_url:'Iracema.jpg', disponivel:1},
+    {id:10, titulo:'Vidas Secas', autor:'Graciliano Ramos', genero:'Romance', media_nota:4.5, total_avaliacoes:14, capa_url:'Vidas Secas.jgp', disponivel:1},
+  ];
+}
+function getDemoBanners() {
+  return [
+    {titulo:'WORLD\nBOOK DAY', descricao:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In a nulla egestas, posuere metus interdum, euismod metus. Sed sit amet pellentesque enim, at posuere.'},
+    {titulo:'NOVIDADES\nDA SEMANA', descricao:'Confira os novos títulos que chegaram à nossa biblioteca esta semana. Venha reservar o seu!'},
+    {titulo:'CLUBE DO\nLIVRO', descricao:'Participe do nosso clube de leitura mensal. Compartilhe suas impressões e descubra novos autores.'},
+  ];
+}
+document.addEventListener('DOMContentLoaded', async () => {
+    // Pega o usuário logado do navegador
+    const usernameLogado = sessionStorage.getItem('username') || localStorage.getItem('username') || 'FULANINHA123';
+    const spanNome = document.getElementById('topbar-user-name');
+    if (spanNome) {
+        spanNome.textContent = usernameLogado.toUpperCase();
+    }
+    const defaultAvatarSVG = `
+      <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="13" fill="#8b6246"/>
+        <circle cx="14" cy="11" r="5" fill="#e8c99a"/>
+        <ellipse cx="14" cy="23" rx="8" ry="4.5" fill="#e8c99a"/>
+      </svg>`;
+    const avatarTarget = document.getElementById('topbar-avatar-target');
+    if (avatarTarget) {
+        // Procure por esta linha dentro do script de homeus.html e adicione a barra / correta:
+try {
+    // 🌟 LINHA CORRIGIDA: Adicionada a barra entre a porta 3000 e a palavra api
+    const res = await fetch(`http://localhost:3000/api/perfil/${usernameLogado}`);
+    const data = await res.json();
+    if (data.user && data.user.foto_perfil) {
+        avatarTarget.innerHTML = `<img src="${data.user.foto_perfil}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    } else {
+        avatarTarget.innerHTML = defaultAvatarSVG;
+    }
+} catch (err) {
+    console.error("Erro ao puxar avatar da topbar:", err);
+    avatarTarget.innerHTML = defaultAvatarSVG;
+}
+    }
+});
+</script>
+</body>
+</html>
